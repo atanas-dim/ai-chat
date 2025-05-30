@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
 import { Message } from "ai";
 
-export function renderMessageContent(message: Message): string {
+function renderMessageContent(message: Message): string {
   // Ignore system/data roles
   if (message.role !== "user" && message.role !== "assistant") {
     return "";
@@ -21,6 +21,7 @@ export function renderMessageContent(message: Message): string {
     baseContent = message.content.trim();
   }
 
+  // TODO Find correct type or create one
   const toolInvocation = (message as any)?.toolInvocations?.[0];
 
   if (toolInvocation?.state === "result") {
