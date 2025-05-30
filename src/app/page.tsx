@@ -5,30 +5,39 @@ import { useEffect, useRef } from "react";
 import { Message } from "ai";
 
 export function renderMessageContent(message: Message): string {
+  // Ignore system/data roles
   if (message.role !== "user" && message.role !== "assistant") {
-    return ""; // Skip rendering system/data messages
+    return "";
   }
+
+  // Start with any visible text content (e.g., assistant's explanation)
+  let baseContent = "";
 
   if (
     message.content &&
     typeof message.content === "string" &&
     message.content.trim() !== ""
   ) {
-    return message.content;
+    baseContent = message.content.trim();
   }
 
   const toolInvocation = (message as any)?.toolInvocations?.[0];
+
   if (toolInvocation?.state === "result") {
-    if (toolInvocation.toolName === "getWeather") {
-      const { location, temperatureCelsius, condition } = toolInvocation.result;
-      return `Weather in ${location}: ${temperatureCelsius}°C, ${condition}`;
-    }
-    if (toolInvocation.toolName === "solveMath") {
-      return `Math result: ${toolInvocation.result.result}`;
+    switch (toolInvocation.toolName) {
+      case "getWeather": {
+        const { location, temperatureCelsius, condition } =
+          toolInvocation.result;
+        return `Weather in ${location}: ${temperatureCelsius}°C, ${condition}`;
+      }
+      case "solveMath": {
+        const mathResult = `Math result: ${toolInvocation.result.result}`;
+        return baseContent ? `${baseContent}\n\n${mathResult}` : mathResult;
+      }
     }
   }
 
-  return "[No content]";
+  return baseContent || "[No content]";
 }
 
 export default function ChatPage() {
